@@ -1,0 +1,72 @@
+---
+title: "Intro_to_RMarkdown"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Italic Text
+
+*Poa* or *Poa*
+
+# Michigan Native Grasses
+
+1.  Sorgastrum
+2.  Calamagrostis
+3.  Andropogon
+
+This is a cool website [mfield](https://mfield.umich.edu)
+
+| Grass         | Height | Flavor |
+|---------------|--------|--------|
+| Sorgastrum    | 2 m    |        |
+| Calamagrostis | 2.5 m  |        |
+| Andropogon    | 2.25 m |        |
+
+: Grass tastiness
+
+```{r}
+library(tidyverse)
+library(readr)
+```
+## Introduction
+
+* read in and reference data source(s)
+
+```{r read-data, message=FALSE}
+BGChem <- read_csv("BGchem2008data.csv")
+
+BGChem
+```
+
+## Analysis
+
+* calc basic summary stats
+ - mean NO3
+ - mean NO2
+ - mean NH4
+ - mean P
+```{r}
+
+nitrate <- mean(BGChem$NO3)
+nitrite <- mean(BGChem$NO2)
+amm <- mean(BGChem$NH4)
+phos <- mean(BGChem$P)
+
+```
+
+* calc mean redfield ratio
+```{r}
+red <- (nitrate + nitrite + amm)/phos
+```
+
+We calculated the redfield ratio to be `r round(red, 2)`
+
+* plot redfield ratio
+
+```{r, echo= FALSE}
+plot (BGChem$P, BGChem$NO2 + BGChem$NO3 + BGChem$NH4)
+```
+
