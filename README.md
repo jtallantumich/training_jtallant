@@ -2,4 +2,4 @@
 
 NCEAS training repo
 
-* changes will come in periodically
+*changes will come in periodically*
