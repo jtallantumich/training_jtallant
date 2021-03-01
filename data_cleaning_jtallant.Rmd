@@ -14,6 +14,131 @@ library(readr)
 ```
 
 ```{r}
+catch_og <- read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
 
+```
+
+```{r}
+catch_data <- catch_og %>% 
+  select(-All, -notesRegCode)
+  #select(Region:Chum)
+  #select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+```
+
+```{r}
+summary(catch_data)
+```
+
+```{r}
+catch_clean <- catch_data %>% 
+  mutate(Chinook = as.numeric(Chinook))
+#line 401 had errand valule, chunck below will fix
+```
+
+```{r}
+catch_clean <- catch_data %>% 
+  mutate(Chinook = ifelse(Chinook == "I", 1, Chinook)) %>% #convert values with I to 1
+  mutate(Chinook = as.numeric(Chinook))
+
+catch_clean
+summary(catch_clean)
+```
+
+```{r}
+catch_clean_long <- catch_clean %>% 
+  pivot_longer(cols = -c(Region, Year), names_to = "species", values_to = "catch")
+
+glimpse(catch_clean_long)
+```
+```{r}
+catch_wide <- catch_clean_long %>% 
+  pivot_wider(names_from = species, values_from = catch)
+
+glimpse(catch_wide)
+```
+
+
+```{r}
+catch_clean_long <- catch_clean_long %>% 
+  rename(catch_thousands = catch)
+
+glimpse(catch_clean_long)
+  
+```
+```{r}
+catch_clean_long <- catch_clean_long %>% 
+  mutate(catch = catch_thousands * 1000) %>% 
+  select(-catch_thousands)
+
+catch_clean_long
+```
+
+```{r}
+mean_region <- catch_clean_long %>% 
+  group_by(Region) %>% 
+  summarise(catch_mean = mean(catch)) %>% 
+  arrange(desc(catch_mean))#this will sort descending column
+
+mean_region
+
+n_region <- catch_clean_long %>% 
+  group_by(Region) %>% 
+  summarise(n = n()) #n function counts rows
+
+n_region
+```
+
+```{r}
+#select certain rows, use the filter function from dplyr
+SSE_catch <- catch_clean_long %>% 
+  filter(Region == "SSE")
+
+SSE_catch
+
+```
+
+```{r}
+region_defs <- read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+  select(code,mgmtArea)
+
+```
+
+```{r}
+catch_join <- left_join(catch_clean_long, region_defs, by = c("Region" = "code"))
+
+catch_join
+```
+
+```{r}
+sites_df <- data.frame(site = c("HAW-101",
+                                "HAW-103",
+                                "OAH-320",
+                                "OAH-219",
+                                "MAI-039"),
+                       stringsAsFactors = FALSE)
+
+sites_df %>% 
+  separate(site, c("island", "site_number"), "-")
+```
+
+```{r}
+dates_df <- data.frame(year = c("1930",
+                                "1930",
+                                "1930"),
+                       month = c("12",
+                                "12",
+                                "12"),
+                       day = c("14",
+                               "15",
+                               "16"),
+                       stringsAsFactors = FALSE)
+
+dates_df
+```
+
+```{r}
+#dates_df %>% 
+  #unite(date, year, month, day, sep = "-") #%>% 
+  
 ```
 
