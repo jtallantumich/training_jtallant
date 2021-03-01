@@ -7,4 +7,8 @@ output: html_document
 
 hello
 
-[Session 8](data_cleaning_jtallant.html)
+- [Session 8](data_cleaning_jtallant.html)
+- Data Interpolation and Gap filling
+- Linear models
+- Animal movement models based on telemetry
+- Data visualization
