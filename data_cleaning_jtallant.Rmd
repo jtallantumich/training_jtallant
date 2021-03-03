@@ -135,10 +135,13 @@ dates_df <- data.frame(year = c("1930",
 
 dates_df
 ```
+```{r}
+library(lubridate)
+```
 
 ```{r}
-#dates_df %>% 
-  #unite(date, year, month, day, sep = "-") #%>% 
-  
+dates_df %>% 
+  unite(date, year, month, day, sep = "-") %>% 
+  mutate(date = mdy(date))
 ```
 
