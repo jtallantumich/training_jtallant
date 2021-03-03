@@ -1,0 +1,93 @@
+---
+title: "Shorebird_analysis"
+author: "jtallantumich"
+date: "3/2/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rvest)
+library(readr)
+library(dplyr)
+library(janitor)
+```
+
+```{r}
+webpage <- read_html("https://www.pwrc.usgs.gov/bbl/manual/speclist.cfm")
+
+tbls <- html_nodes(webpage, "table") %>% 
+    html_table(fill = TRUE)
+
+species <- tbls[[1]] %>% 
+    clean_names() %>% #from Janitor package, cleans up the names field
+    select(alpha_code, common_name) %>% 
+    mutate(alpha_code = tolower(alpha_code)) #change the alpha codes to lower case
+```
+
+```{r}
+U_pred_survey <- read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A9ffec04c-7e2d-41dd-9e88-b6c2e8c4375e")
+
+U_nests <- read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A982bd2fc-4edf-4da7-96ef-0d11b853102d")
+
+U_nests
+U_pred_survey
+```
+
+```{r}
+
+#join based on species acronym and add species full name to data frame
+
+Species_name_match <- function(i, species) {
+  return_i <- left_join(i, species, by = c("species" = "alpha_code"))
+  return(return_i)
+}
+
+#with_name_nest <- Species_name_match(U_nests,species)
+#Species_name_match(U_pred_survey,species)
+
+#head(with_name_nest)
+
+```
+```{r}
+preditors <- with_name_pred %>% 
+  group_by(year,common_name) %>% 
+  summarise(count_pred = sum(count)) %>% 
+  filter(!is.na(common_name))
+
+preditors
+  
+ggplot(preditors, aes(x = year, y = count_pred, )) +
+  #geom_point() +
+  #geom_line() +
+  geom_col(fill = blue)
+```
+ 
+```{r}
+nests_species <- with_name_nest %>% 
+  group_by(common_name, year) %>% 
+  summarise(total_predated = sum(number_eggs_predated)) %>% 
+  filter(!is.na(common_name))
+
+pred_total <- with_name_pred %>% 
+  group_by(year) %>% 
+  summarise(count_pred = sum(count))
+  
+nest_pred_join <- left_join(nests_species, pred_total, by = "year")
+
+nests_species
+pred_total
+nest_pred_join
+```
+
+```{r}
+ggplot(nest_pred_join, aes(x = count_pred, y = total_predated)) +
+  geom_point() +
+  facet_wrap(~common_name, scales = "free_y", ncol = 2) 
+```
+
